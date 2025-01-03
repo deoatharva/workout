@@ -38,7 +38,7 @@ def fetch_today_workout():
         collection.insert_one(workout)
     return workout
 
-# Calculate monthly and yearly status
+# Calculate status (completed and missed days)
 def calculate_status():
     all_workouts = list(collection.find())
     completed_days = sum(1 for w in all_workouts if w["done"])
@@ -65,15 +65,9 @@ if st.checkbox("Mark as Done", value=workout["done"]):
     else:
         st.info("Workout already marked as done.")
 
-# Monthly and yearly status
-if today.day == 31 or today.month != (today + timedelta(days=1)).month:
-    st.subheader("Monthly Status")
+# Add a button to check status
+if st.button("Status"):
     completed_days, missed_days = calculate_status()
-    st.write(f"Days Completed: {completed_days}")
-    st.write(f"Days Missed: {missed_days}")
-
-if today.month == 12 and today.day == 31:
-    st.subheader("Yearly Status")
-    completed_days, missed_days = calculate_status()
-    st.write(f"Days Completed: {completed_days}")
-    st.write(f"Days Missed: {missed_days}")
+    st.subheader("Workout Status")
+    st.write(f"Total Days Completed: {completed_days}")
+    st.write(f"Total Days Missed: {missed_days}")
