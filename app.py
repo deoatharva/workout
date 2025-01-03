@@ -2,9 +2,15 @@ import streamlit as st
 import pymongo
 from datetime import datetime, timedelta
 
-# Connect to MongoDB
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["workout_tracker"]
+# Replace with your MongoDB Atlas credentials
+username = "studywork039"
+password = "QEXgQTU2U6PFvAdK"
+dbname = "workout-tracker-cluster"
+
+# Connect to MongoDB Atlas
+mongo_uri = f"mongodb+srv://studywork039:QEXgQTU2U6PFvAdK@workout-tracker-cluster.nv9l7.mongodb.net/?retryWrites=true&w=majority&appName=workout-tracker-cluster"
+client = pymongo.MongoClient(mongo_uri)
+db = client[dbname]
 collection = db["daily_workouts"]
 
 # Initialize workout data
@@ -38,7 +44,7 @@ def fetch_today_workout():
         collection.insert_one(workout)
     return workout
 
-# Calculate status (completed and missed days)
+# Calculate monthly and yearly status
 def calculate_status():
     all_workouts = list(collection.find())
     completed_days = sum(1 for w in all_workouts if w["done"])
@@ -65,9 +71,15 @@ if st.checkbox("Mark as Done", value=workout["done"]):
     else:
         st.info("Workout already marked as done.")
 
-# Add a button to check status
-if st.button("Status"):
+# Monthly and yearly status
+if today.day == 31 or today.month != (today + timedelta(days=1)).month:
+    st.subheader("Monthly Status")
     completed_days, missed_days = calculate_status()
-    st.subheader("Workout Status")
-    st.write(f"Total Days Completed: {completed_days}")
-    st.write(f"Total Days Missed: {missed_days}")
+    st.write(f"Days Completed: {completed_days}")
+    st.write(f"Days Missed: {missed_days}")
+
+if today.month == 12 and today.day == 31:
+    st.subheader("Yearly Status")
+    completed_days, missed_days = calculate_status()
+    st.write(f"Days Completed: {completed_days}")
+    st.write(f"Days Missed: {missed_days}")
